@@ -38,9 +38,14 @@ export default function Sidebar() {
       
       {/* Logout at bottom */}
       <div className="mt-auto">
-         <Link to="/login" className="text-neutral-600 text-2xl hover:bg-neutral-600 transition-colors rounded-lg" title='Logout'>
-            👤
-         </Link>
+        <button
+            onClick={() => {
+            localStorage.removeItem('user')
+            window.location.href = '/login'
+            }}
+          className="text-neutral-600 text-2xl hover:bg-neutral-600 transition-colors rounded-lg">
+          👤
+        </button>
       </div>
     </aside>
   );

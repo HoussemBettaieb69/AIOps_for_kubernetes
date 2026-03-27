@@ -1,14 +1,32 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+
 
 export default function Login() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-
-  const handleSignIn = (e) => {
-    e.preventDefault()
-    // backend yetzad honi
-    console.log('Sign in Attempt:', { username, password })
+  const navigate = useNavigate()
+  const [error, setError] = useState('')
+  const handleSignIn = async (e) => {
+  e.preventDefault()
+  setError('')
+  try {
+    const res = await fetch('http://localhost:8000/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    })
+    if (!res.ok) {
+      setError('Invalid username or password')
+      return
+    }
+    const user = await res.json()
+    localStorage.setItem('user', JSON.stringify(user))
+    navigate(user.isAdmin ? '/user_management' : '/alerts')
+  } catch {
+    setError('Cannot connect to server')
   }
+}
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-4 font-sans">
@@ -60,7 +78,9 @@ export default function Login() {
                 className="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-2.5 text-white placeholder-neutral-500 focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all"
               />
             </div>
-
+            {error && (
+              <p className="text-red-400 text-sm text-center">{error}</p>
+            )}
             {/* Sign In Button  */}
             <button
               type="submit"
