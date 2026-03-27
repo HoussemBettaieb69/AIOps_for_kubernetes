@@ -1,1 +1,0 @@
-# AIOps_for_kubernetes

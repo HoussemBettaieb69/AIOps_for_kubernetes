@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import Login from './pages/login.jsx'
 import UserManagement from './pages/user_managment.jsx'
 import Alerts from './pages/alerts.jsx'
+import Dashboard from './pages/DashboardPage.jsx'
 import Sidebar from './components/sidebar.jsx'
 
 function ProtectedRoute({ children, adminOnly = false }) {
@@ -33,6 +34,7 @@ function App() {
           <Route path="/alerts" element={
             <ProtectedRoute><Alerts /></ProtectedRoute>
           } />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/user_management" element={
             <ProtectedRoute adminOnly={true}><UserManagement /></ProtectedRoute>
           } />

@@ -12,6 +12,12 @@
     "isAdmin": false
   },
   {
+    "id": "3",
+    "username": "aziz",
+    "password": "123",
+    "isAdmin": true
+  },
+  {
     "id": "4",
     "username": "houssem",
     "password": "123",
