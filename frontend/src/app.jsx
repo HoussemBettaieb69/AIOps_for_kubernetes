@@ -3,7 +3,10 @@ import Login from './pages/login.jsx'
 import UserManagement from './pages/user_managment.jsx'
 import Alerts from './pages/alerts.jsx'
 import Dashboard from './pages/DashboardPage.jsx'
+import ChatHistoryPage from './pages/ChatHistoryPage.jsx'
 import Sidebar from './components/sidebar.jsx'
+import AIButton from './components/AIButton.jsx'
+import AIChatWindow from './components/AIChatWindow.jsx'
 
 function ProtectedRoute({ children, adminOnly = false }) {
   const user = JSON.parse(localStorage.getItem('user'))
@@ -35,11 +38,20 @@ function App() {
             <ProtectedRoute><Alerts /></ProtectedRoute>
           } />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/chat_history" element={<ChatHistoryPage />} />
           <Route path="/user_management" element={
             <ProtectedRoute adminOnly={true}><UserManagement /></ProtectedRoute>
           } />
           <Route path="/" element={<Navigate to="/login" />} />
         </Routes>
+        <AIButton mode="general" onClick={() => setOpen(true)} />
+
+      {open && (
+        <AIChatWindow
+          mode="general"
+          onClose={() => setOpen(false)}
+        />
+      )}
       </AppLayout>
     </Router>
   )
