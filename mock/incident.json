@@ -1,0 +1,64 @@
+[
+  {
+    "id": "1",
+    "title": "Pod CrashLoopBackOff — payment-api",
+    "type": "incident",
+    "severity": "high",
+    "status": "open",
+    "timestamp": "2026-03-24T14:32:00Z",
+    "service": "payment-api",
+    "pod": "payment-api-6f8d7",
+    "summary": "The payment-api pod has been restarting repeatedly due to memory exhaustion. OOMKilled errors detected 4 times in the last 30 minutes.",
+    "suggestion": "Increase the memory limit for the payment-api container from 512MB to at least 1GB. Review the database query on PaymentService that loads unbounded result sets.",
+    "metrics": [
+      { "timestamp": "2026-03-24T14:31:58Z", "cpu": 91.2, "memory": 98.4 },
+      { "timestamp": "2026-03-24T14:31:30Z", "cpu": 74.5, "memory": 87.1 },
+      { "timestamp": "2026-03-24T14:31:00Z", "cpu": 65.0, "memory": 80.3 }
+    ],
+    "logs": [
+      { "timestamp": "2026-03-24T14:32:04Z", "level": "error", "message": "OOMKilled — container exceeded memory limit" },
+      { "timestamp": "2026-03-24T14:31:45Z", "level": "error", "message": "Connection timeout to db-primary:5432" },
+      { "timestamp": "2026-03-24T14:31:20Z", "level": "warning", "message": "Memory usage above 80% threshold" }
+    ]
+  },
+  {
+    "id": "2",
+    "title": "High CPU usage — nginx-xyz",
+    "type": "incident",
+    "severity": "low",
+    "status": "resolved",
+    "timestamp": "2026-03-24T13:15:00Z",
+    "service": "nginx-xyz",
+    "pod": "nginx-xyz-78asd",
+    "summary": "A CPU spike was detected on the nginx pod reaching 95% usage for approximately 3 minutes before stabilizing. No service disruption occurred.",
+    "suggestion": "Monitor for recurrence. If CPU spikes again consider reviewing nginx worker process configuration.",
+    "metrics": [
+      { "timestamp": "2026-03-24T13:15:00Z", "cpu": 95.0, "memory": 45.2 },
+      { "timestamp": "2026-03-24T13:14:30Z", "cpu": 88.3, "memory": 44.8 },
+      { "timestamp": "2026-03-24T13:14:00Z", "cpu": 72.1, "memory": 44.1 }
+    ],
+    "logs": [
+      { "timestamp": "2026-03-24T13:15:10Z", "level": "warning", "message": "CPU usage exceeded 90% threshold" },
+      { "timestamp": "2026-03-24T13:14:50Z", "level": "info", "message": "Incoming request spike detected — 1200 req/s" }
+    ]
+  },
+  {
+    "id": "3",
+    "title": "Service unavailable — orders-db",
+    "type": "incident",
+    "severity": "high",
+    "status": "open",
+    "timestamp": "2026-03-24T15:01:00Z",
+    "service": "orders-db",
+    "pod": "orders-db-0",
+    "summary": "The orders database pod is completely down. All dependent services are failing to connect.",
+    "suggestion": "Check persistent volume claim status. Run kubectl describe pod orders-db-0 to identify the root cause. Consider restoring from the last healthy snapshot.",
+    "metrics": [
+      { "timestamp": "2026-03-24T15:01:00Z", "cpu": 0.0, "memory": 0.0 }
+    ],
+    "logs": [
+      { "timestamp": "2026-03-24T15:01:05Z", "level": "error", "message": "Pod failed to start — PVC mount error" },
+      { "timestamp": "2026-03-24T15:00:58Z", "level": "error", "message": "Liveness probe failed — connection refused" }
+    ]
+  }
+]

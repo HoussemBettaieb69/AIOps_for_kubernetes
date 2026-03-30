@@ -1,0 +1,48 @@
+[
+  {
+    "id": "1",
+    "title": "Memory exhaustion predicted — auth-service",
+    "type": "prediction",
+    "severity": "medium",
+    "status": "open",
+    "timestamp": "2026-03-24T14:45:00Z",
+    "service": "auth-service",
+    "pod": "auth-service-2x9k1",
+    "confidence": 82,
+    "predicted_time": "2026-03-24T15:15:00Z",
+    "summary": "Memory usage on auth-service has been steadily increasing over the last 45 minutes. At the current trend it will exceed the container limit within 30 minutes.",
+    "suggestion": "Proactively increase memory limit or restart the pod during a low-traffic window to reset memory state. Investigate for potential memory leak in session handling.",
+    "metrics": [
+      { "timestamp": "2026-03-24T14:45:00Z", "cpu": 55.0, "memory": 63.0 },
+      { "timestamp": "2026-03-24T14:30:00Z", "cpu": 52.1, "memory": 57.4 },
+      { "timestamp": "2026-03-24T14:15:00Z", "cpu": 50.8, "memory": 51.2 }
+    ],
+    "logs": [
+      { "timestamp": "2026-03-24T14:44:00Z", "level": "warning", "message": "Memory usage trending upward — 63% and rising" },
+      { "timestamp": "2026-03-24T14:30:00Z", "level": "info", "message": "Session cache size increased by 18% in last 15 minutes" }
+    ]
+  },
+  {
+    "id": "2",
+    "title": "CPU saturation predicted — payment-api",
+    "type": "prediction",
+    "severity": "high",
+    "status": "open",
+    "timestamp": "2026-03-24T15:05:00Z",
+    "service": "payment-api",
+    "pod": "payment-api-6f8d7",
+    "confidence": 91,
+    "predicted_time": "2026-03-24T15:20:00Z",
+    "summary": "CPU usage on payment-api has spiked following the memory incident. At current load the service will saturate CPU within 15 minutes causing request timeouts.",
+    "suggestion": "Scale the payment-api deployment to 2 replicas immediately to distribute load. Investigate the root cause of the increased CPU demand post-restart.",
+    "metrics": [
+      { "timestamp": "2026-03-24T15:05:00Z", "cpu": 72.0, "memory": 81.0 },
+      { "timestamp": "2026-03-24T14:55:00Z", "cpu": 61.3, "memory": 75.2 },
+      { "timestamp": "2026-03-24T14:45:00Z", "cpu": 48.7, "memory": 68.9 }
+    ],
+    "logs": [
+      { "timestamp": "2026-03-24T15:04:50Z", "level": "warning", "message": "Request queue growing — average response time 850ms" },
+      { "timestamp": "2026-03-24T14:58:00Z", "level": "info", "message": "Post-restart load spike detected" }
+    ]
+  }
+]
