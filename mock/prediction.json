@@ -1,7 +1,7 @@
 [
   {
     "id": "1",
-    "title": "Memory exhaustion predicted — auth-service",
+    "title": "Memory exhaustion predicted -> auth-service",
     "type": "prediction",
     "severity": "medium",
     "status": "open",
@@ -24,7 +24,7 @@
   },
   {
     "id": "2",
-    "title": "CPU saturation predicted — payment-api",
+    "title": "CPU saturation predicted -> payment-api",
     "type": "prediction",
     "severity": "high",
     "status": "open",

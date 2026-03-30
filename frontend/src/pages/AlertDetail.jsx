@@ -45,7 +45,7 @@ export default function AlertDetailPage({ type }) {
     <div className="p-8 text-white">
       {/* Header */}
       <div className="mb-8">
-        <Link to="/alerts" className="flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-4 text-sm w-fit cursor-pointer">
+        <Link to="/alerts" className="inline-flex mb-6 px-4 py-2 bg-neutral-900 border border-neutral-700 text-white rounded-lg hover:bg-neutral-800 transition-colors ">
           <span>←</span> Back to Alerts
         </Link>
         <div className="flex justify-between items-start">
@@ -82,7 +82,7 @@ export default function AlertDetailPage({ type }) {
 
         <div className="bg-neutral-900 border-l-4 border-blue-500 p-6 rounded-r-lg">
           <h2 className="text-blue-400 font-bold mb-2 flex items-center gap-2">
-            <span>🤖</span> AI Analysis Summary
+            <span>✨</span> AI Analysis Summary
           </h2>
           <p className="text-neutral-300 text-sm leading-relaxed">{alert.summary}</p>
         </div>

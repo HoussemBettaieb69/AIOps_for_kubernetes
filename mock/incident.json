@@ -1,7 +1,7 @@
 [
   {
     "id": "1",
-    "title": "Pod CrashLoopBackOff — payment-api",
+    "title": "Pod CrashLoopBackOff -> payment-api",
     "type": "incident",
     "severity": "high",
     "status": "open",
@@ -23,7 +23,7 @@
   },
   {
     "id": "2",
-    "title": "High CPU usage — nginx-xyz",
+    "title": "High CPU usage -> nginx-xyz",
     "type": "incident",
     "severity": "low",
     "status": "resolved",
@@ -44,7 +44,7 @@
   },
   {
     "id": "3",
-    "title": "Service unavailable — orders-db",
+    "title": "Service unavailable -> orders-db",
     "type": "incident",
     "severity": "high",
     "status": "open",
