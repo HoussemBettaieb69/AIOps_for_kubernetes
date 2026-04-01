@@ -31,7 +31,7 @@ export default function AIChatWindow({ mode = "general", onClose }) {
       
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-800">
-        <h2 className="font-semibold text-sm">
+        <h2 className="font-semibold text-sm text-blue-400 flex items-center gap-2">
           AI Assistant
         </h2>
 
@@ -77,7 +77,7 @@ export default function AIChatWindow({ mode = "general", onClose }) {
               ? "Ask about this incident..."
               : "Ask anything..."
           }
-          className="flex-1 bg-neutral-800 text-sm px-3 py-2 rounded outline-none"
+          className="flex-1 bg-neutral-800 text-sm px-3 py-2 rounded outline-none text-white"
         />
 
         <button
