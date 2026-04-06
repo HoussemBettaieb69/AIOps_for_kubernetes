@@ -43,8 +43,11 @@ def add_user(new_user: NewUser):
     col = get_collection("login")
     if col.find_one({"username": new_user.username}):
         raise HTTPException(status_code=400, detail="Username already exists")
-    users = list(col.find())
-    new_id = str(len(users) + 1)
+    existing_ids = {int(u["id"]) for u in col.find({}, {"id": 1})}
+    new_id=1
+    while new_id in existing_ids  :
+        new_id +=1 
+    new_id = str(new_id)    
     user = {
         "id": new_id,
         "username": new_user.username,
@@ -52,7 +55,7 @@ def add_user(new_user: NewUser):
         "isAdmin": new_user.isAdmin
     }
     col.insert_one(user)
-    return fix_id(col.find_one({"id": new_id}))
+    return fix_id(user)
 
 @router.patch("/users/{user_id}")
 def update_user(user_id: str, data: UpdateUser):
