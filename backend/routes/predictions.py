@@ -1,44 +1,37 @@
 from fastapi import APIRouter, HTTPException
-import json
-import os
+import sys, os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from services.db_services import get_collection
 
 router = APIRouter()
 
-PREDICTIONS_PATH = os.path.join(os.path.dirname(__file__), "../../mock/prediction.json")
-
-def read_json(path):
-    with open(path, "r") as f:
-        return json.load(f)
-
-def write_json(path, data):
-    with open(path, "w") as f:
-        json.dump(data, f, indent=2)
+def fix_id(doc):
+    doc["_id"] = str(doc["_id"])
+    return doc
 
 @router.get("/")
 def get_predictions():
-    return read_json(PREDICTIONS_PATH)
+    col = get_collection("prediction")
+    return [fix_id(p) for p in col.find()]
 
 @router.get("/{prediction_id}")
 def get_prediction(prediction_id: str):
-    predictions = read_json(PREDICTIONS_PATH)
-    prediction = next((p for p in predictions if p["id"] == prediction_id), None)
+    col = get_collection("prediction")
+    prediction = col.find_one({"id": prediction_id})
     if not prediction:
         raise HTTPException(status_code=404, detail="Prediction not found")
-    return prediction
+    return fix_id(prediction)
 
 @router.patch("/{prediction_id}/status")
 def update_prediction_status(prediction_id: str, body: dict):
-    predictions = read_json(PREDICTIONS_PATH)
-    prediction = next((p for p in predictions if p["id"] == prediction_id), None)
-    if not prediction:
+    col = get_collection("prediction")
+    result = col.update_one({"id": prediction_id}, {"$set": {"status": body["status"]}})
+    if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Prediction not found")
-    prediction["status"] = body["status"]
-    write_json(PREDICTIONS_PATH, predictions)
-    return prediction
+    return fix_id(col.find_one({"id": prediction_id}))
 
 @router.delete("/{prediction_id}")
 def delete_prediction(prediction_id: str):
-    predictions = read_json(PREDICTIONS_PATH)
-    predictions = [p for p in predictions if p["id"] != prediction_id]
-    write_json(PREDICTIONS_PATH, predictions)
+    col = get_collection("prediction")
+    col.delete_one({"id": prediction_id})
     return {"message": "Prediction deleted"}

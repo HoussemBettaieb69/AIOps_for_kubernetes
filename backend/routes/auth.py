@@ -1,19 +1,15 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-import json
-import os
+import sys, os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from services.db_services import get_collection
+
 
 router = APIRouter()
 
-MOCK_PATH = os.path.join(os.path.dirname(__file__), "../../mock/login.json")
-
-def read_users():
-    with open(MOCK_PATH, "r") as f:
-        return json.load(f)
-
-def write_users(users):
-    with open(MOCK_PATH, "w") as f:
-        json.dump(users, f, indent=2)
+def fix_id(doc):
+    doc["_id"] = str(doc["_id"])
+    return doc
 
 class LoginRequest(BaseModel):
     username: str
@@ -31,49 +27,50 @@ class UpdateUser(BaseModel):
 
 @router.post("/login")
 def login(request: LoginRequest):
-    users = read_users()
-    user = next((u for u in users if u["username"] == request.username and u["password"] == request.password), None)
+    col = get_collection("login")
+    user = col.find_one({"username": request.username, "password": request.password})
     if not user:
         raise HTTPException(status_code=401, detail="Invalid username or password")
     return {"id": user["id"], "username": user["username"], "isAdmin": user["isAdmin"]}
 
 @router.get("/users")
 def get_users():
-    return read_users()
+    col = get_collection("login")
+    return [fix_id(u) for u in col.find()]
 
 @router.post("/users")
 def add_user(new_user: NewUser):
-    users = read_users()
-    if any(u["username"] == new_user.username for u in users):
+    col = get_collection("login")
+    if col.find_one({"username": new_user.username}):
         raise HTTPException(status_code=400, detail="Username already exists")
+    users = list(col.find())
+    new_id = str(len(users) + 1)
     user = {
-        "id": str(len(users) + 1),
+        "id": new_id,
         "username": new_user.username,
         "password": new_user.password,
         "isAdmin": new_user.isAdmin
     }
-    users.append(user)
-    write_users(users)
-    return user
+    col.insert_one(user)
+    return fix_id(col.find_one({"id": new_id}))
 
 @router.patch("/users/{user_id}")
 def update_user(user_id: str, data: UpdateUser):
-    users = read_users()
-    user = next((u for u in users if u["id"] == user_id), None)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+    col = get_collection("login")
+    update = {}
     if data.username is not None:
-        user["username"] = data.username
+        update["username"] = data.username
     if data.password is not None:
-        user["password"] = data.password
+        update["password"] = data.password
     if data.isAdmin is not None:
-        user["isAdmin"] = data.isAdmin
-    write_users(users)
-    return user
+        update["isAdmin"] = data.isAdmin
+    result = col.update_one({"id": user_id}, {"$set": update})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    return fix_id(col.find_one({"id": user_id}))
 
 @router.delete("/users/{user_id}")
 def delete_user(user_id: str):
-    users = read_users()
-    users = [u for u in users if u["id"] != user_id]
-    write_users(users)
+    col = get_collection("login")
+    col.delete_one({"id": user_id})
     return {"message": "User deleted"}
