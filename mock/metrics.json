@@ -1,0 +1,63 @@
+{
+  "status": "success",
+  "data": {
+    "resultType": "matrix",
+    "result": [
+        {
+        "metric": {
+          "__name__": "cluster_cpu_usage_total",
+          "cluster": "prod-us-east-1",
+          "level": "cluster"
+        },
+        "values": [["1712584800", "65.5"], ["1712584815", "67.2"],["1712584830", "69"],["1712584845", "80"],["1712584860", "67.2"]]
+      },
+      {
+        "metric": {
+          "__name__": "cluster_memory_usage_total",
+          "cluster": "prod-us-east-1",
+          "level": "cluster"
+        },
+        "values": [["1712584800", "78.1"], ["1712584815", "78.4"],["1712584830", "80"],["1712584845", "85"],["1712584860", "76.6"]]
+      },
+      {
+        "metric": {
+          "__name__": "cpu_usage",
+          "service": "payment-api",
+          "pod_name": "payment-api-6f8d7",
+          "status": "Warning"
+        },
+        "values": [
+          ["1712584800", "72"],
+          ["1712584815", "74"],
+          ["1712584830", "71"]
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "memory_usage",
+          "service": "payment-api",
+          "pod_name": "payment-api-6f8d7",
+          "status": "Warning"
+        },
+        "values": [
+          ["1712584800", "81"],
+          ["1712584815", "82"],
+          ["1712584830", "81"]
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "cpu_usage",
+          "service": "auth-service",
+          "pod_name": "auth-service-2x9k1",
+          "status": "Running"
+        },
+        "values": [
+          ["1712584800", "55"],
+          ["1712584815", "56"],
+          ["1712584830", "54"]
+        ]
+      }
+    ]
+  }
+}
