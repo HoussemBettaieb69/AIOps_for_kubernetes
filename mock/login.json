@@ -7,8 +7,8 @@
   },
   {
     "id": "2",
-    "username": "operator_1",
-    "password": "op123",
+    "username": "user",
+    "password": "123",
     "isAdmin": false
   },
   {
