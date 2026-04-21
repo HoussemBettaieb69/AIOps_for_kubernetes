@@ -8,7 +8,7 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
-
+import AIChat from '../components/AIChat.jsx';
 const API_BASE_URL = 'http://localhost:8000';
 
 export default function DashboardPage() {
@@ -169,6 +169,7 @@ export default function DashboardPage() {
           </tbody>
         </table>
       </div>
+      
     </div>
   );
 }

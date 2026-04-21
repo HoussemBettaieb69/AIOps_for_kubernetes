@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import AIChat from "../components/AIChat.jsx";
+import { useChatContext } from './ChatContext.jsx';
 
 const API = 'http://localhost:8000';
 
@@ -7,11 +9,17 @@ export default function AlertDetailPage({ type }) {
   const { id } = useParams()
   const [alert, setAlert] = useState(null)
   const [filter, setFilter] = useState('All')
+  const { setAlertContext } = useChatContext()
 
   useEffect(() => {
     fetch(`${API}/${type}s/${id}`)
       .then(res => res.json())
-      .then(data => setAlert(data))
+      .then(data => {
+        setAlert(data)
+        setAlertContext({ alertId: data.id, title: data.title }) 
+      })
+
+    return () => setAlertContext(null) // 👈 clear it when leaving the page
   }, [id, type])
 
   if (!alert) return <div className="p-8 text-white">Loading...</div>
@@ -127,6 +135,7 @@ export default function AlertDetailPage({ type }) {
           </table>
         </div>
       </div>
+      
     </div>
   )
 }
