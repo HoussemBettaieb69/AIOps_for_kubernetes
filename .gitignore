@@ -21,6 +21,7 @@ dist-ssr
 *.local
 
 # Editor directories and files
+/fluent-values.yaml
 .vscode/*
 !.vscode/extensions.json
 .idea

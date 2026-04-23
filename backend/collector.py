@@ -9,9 +9,9 @@ from services.metrics_services import fetch_and_save_real_metrics
 from services.logs_services import cleanup_old_logs
 
 
-if __name__ == "__main__":
+if __name__ == "__main__" :
 
-    print("🚀 Starting AIOps Real-Time Collector...")
+    print(" Starting AIOps Real-Time Collector...")
 
     last_log_cleanup = time.time()
 
@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
             if now - last_log_cleanup >= 300 :
                 cleanup_old_logs()
-                print("🧹 Old logs cleaned")
+                print(" Old logs cleaned")
                 last_log_cleanup = now
 
         except Exception as e:
