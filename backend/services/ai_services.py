@@ -1,94 +1,169 @@
 import ollama
 import json
+import hashlib
 from datetime import datetime
 
-def analyze_with_llm(metrics, logs, alert_type="incident"):
-    """
-    metrics: List of metric objects from your collector
-    logs: List of log objects from your collector
-    alert_type: "incident" or "prediction"
-    """
-    
-    timestamp_str = datetime.now().strftime("%Y%m%dT%H%M%S")
-    current_iso = datetime.now().isoformat() + "Z"
+def classify_alert(metrics, logs):
 
-    # 1. THE PROMPT: We only ask the AI for the 'Creative' fields
     prompt = f"""
-    [SYSTEM]
-    You are a K8s AIOps expert. Analyze the provided data and return ONLY a JSON object.
-    
-    [SCHEMA]
-    {{
-      "title": "Clear title of the issue",
-      "severity": "high, medium, or low",
-      "service": "affected-service-name",
-      "pod": "affected-pod-name",
-      "confidence": 85,
-      "summary": "Detailed technical analysis of what happened",
-      "suggestion": "Step-by-step fix"
-    }}
-    
-    [DATA]
-    Metrics: {json.dumps(metrics[:5])}
-    Logs: {json.dumps(logs[:5])}
-    
-    Return ONLY JSON.
-    """
-    
-    try:
-        response = ollama.chat(
-            model='batiai/gemma4-e2b:q4', 
-            messages=[{'role': 'user', 'content': prompt}]
-        )
-        content = response['message']['content']
-        
-        # Extract JSON safely
-        start = content.find('{')
-        end = content.rfind('}') + 1
-        ai_data = json.loads(content[start:end])
-        
-        # 2. THE ENFORCEMENT: We map AI data into your EXACT MongoDB structure.
-        # This prevents white screens because every field React needs is guaranteed to exist.
-        perfect_json = {
-            "id": f"AI-{alert_type.upper()[:4]}-{timestamp_str}",
-            "title": ai_data.get("title", f"Anomalous activity in {alert_type}"),
-            "type": alert_type,
-            "severity": ai_data.get("severity", "medium").lower(),
-            "status": "open",
-            "timestamp": current_iso,
-            "service": ai_data.get("service", "unknown-service"),
-            "pod": ai_data.get("pod", "unknown-pod"),
-            "confidence": ai_data.get("confidence", 80),
-            "summary": ai_data.get("summary", "Analysis in progress..."),
-            "suggestion": ai_data.get("suggestion", "Check Kubernetes logs for more details."),
-            # We inject the metrics/logs directly from the source, NOT from the AI's answer.
-            # This ensures they are perfectly formatted arrays.
-            "metrics": metrics if isinstance(metrics, list) else [],
-            "logs": logs if isinstance(logs, list) else []
-        }
+You are a strict JSON generator.
 
-        # If it's a prediction, we can add the extra field you use
-        if alert_type == "prediction":
-            perfect_json["predicted_time"] = ai_data.get("predicted_time", current_iso)
+Return ONLY ONE of these EXACT outputs:
 
-        return perfect_json
+{{"type":"incident"}}
+OR
+{{"type":"prediction"}}
 
-    except Exception as e:
-        print(f"CRITICAL ERROR in AI Generation: {e}")
-        # FALLBACK: Return a valid object so the frontend still renders safely.
-        return {
-            "id": f"ERR-{timestamp_str}",
-            "title": "Failed to Generate Analysis",
-            "type": alert_type,
-            "severity": "high",
-            "status": "error",
-            "timestamp": current_iso,
-            "summary": "The AI model returned an invalid response.",
-            "suggestion": "Please check backend logs or try again.",
-            "metrics": [],
-            "logs": []
-        }
+Rules:
+- No additional fields
+- No explanations
+- No metrics
+- No logs
+- No extra text
+- Output must be EXACTLY one JSON object
 
-# Example of how you would call this in your route:
-# result = analyze_with_llm(raw_metrics, raw_logs, "prediction")
-# db.incidents.insert_one(result)
+Now classify:
+
+Metrics: {metrics}
+Logs: {logs}
+"""
+
+
+
+    response = ollama.chat(
+        model="batiai/gemma4-e2b:q4",
+        messages=[{"role": "user", "content": prompt}],
+        options={"temperature": 0}
+    )
+
+    return response["message"]["content"]
+
+
+def validate_classification(data):
+    if not isinstance(data, dict):
+        return None
+
+    t = data.get("type")
+
+    if t in ["incident", "prediction"]:
+        return t
+
+    return None
+
+
+def analyze_incident(metrics, logs):
+
+    prompt = f"""
+You are an AIOps incident analysis expert.
+
+Analyze the CURRENT issue.
+
+Metrics:
+{metrics}
+
+Logs:
+{logs}
+
+Your task:
+1. Identify root cause
+2. Explain impact
+3. Assign severity (LOW, MEDIUM, HIGH, CRITICAL)
+4. Suggest immediate fix
+
+Output ONLY JSON:
+{{
+  "type": "incident",
+  "root_cause": "...",
+  "impact": "...",
+  "severity": "...",
+  "solution": "..."
+}}
+"""
+
+    response = ollama.chat(
+        model="batiai/gemma4-e2b:q4",
+        messages=[{"role": "user", "content": prompt}],
+        options={"temperature": 0.2}
+    )
+
+    return response["message"]["content"]
+
+
+def analyze_prediction(metrics, logs):
+    import ollama
+
+    prompt = f"""
+You are an AIOps predictive analysis expert.
+
+Analyze potential FUTURE risks.
+
+Metrics:
+{metrics}
+
+Logs:
+{logs}
+
+Your task:
+1. Identify risk pattern
+2. Explain why it may become a problem
+3. Assign risk level (LOW, MEDIUM, HIGH)
+4. Suggest preventive action
+
+Output ONLY JSON:
+{{
+  "type": "prediction",
+  "risk": "...",
+  "reason": "...",
+  "severity": "...",
+  "prevention": "..."
+}}
+"""
+
+    response = ollama.chat(
+        model="batiai/gemma4-e2b:q4",
+        messages=[{"role": "user", "content": prompt}],
+        options={"temperature": 0.2}
+    )
+
+    return response["message"]["content"]
+
+def extract_k8s_context(logs):
+    service = None
+    pod = None
+    namespace = None
+
+    for log in logs:
+        if not isinstance(log, dict):
+            continue
+
+        # 🔹 Kubernetes block (your real structure)
+        k8s = log.get("kubernetes", {})
+
+        if isinstance(k8s, dict):
+            pod = pod or k8s.get("pod_name")
+            namespace = namespace or k8s.get("namespace_name")
+
+            # try to infer service from labels
+            labels = k8s.get("labels", {})
+            if isinstance(labels, dict):
+                service = service or labels.get("app.kubernetes.io/name")
+
+        # 🔹 fallback from top-level
+        service = service or log.get("service")
+        pod = pod or log.get("pod")
+
+    return {
+        "service": service or "unknown-service",
+        "pod": pod or "unknown-pod",
+        "namespace": namespace or "default"
+    }
+
+def generate_fingerprint(metrics, logs, alert_type):
+    key = {
+        "type": alert_type,
+        "metrics": metrics[-3:],  # reduce noise
+        "logs": logs[-5:]
+    }
+
+    raw = json.dumps(key, sort_keys=True).encode()
+    return hashlib.sha256(raw).hexdigest()
